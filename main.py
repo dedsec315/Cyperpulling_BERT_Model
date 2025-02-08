@@ -1,21 +1,40 @@
 from gensim.models import Word2Vec
 import gensim
+import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
-import warnings
 import pandas as pd
 
-warnings.filterwarnings(action='ignore')
 
-# Read the data
+# Function to load and preprocess the dataset 
 
-df = pd.read_json('./Dataset/dataset.json')
+def loadAndPreProcess(path):
+  
+  df = pd.read_json(path, lines = True) # Read the data
+
+  df["label"] = df.annotation.apply(lambda x: x.get('label'))  # Extract label list
+  df["label"] = df.label.apply(lambda x: x[0])  # Get first label from the list
+    
+  X = df.content.values  # Extract text content
+  y = df.label.values  # Extract labels
+  
+  return X, y
 
 
-# See the data
+# Load the data
 
-df.head()
+X, y = loadAndPreProcess('/content/Dataset.json')
 
-# Tokenize the data
+# Store them in a new list
 
-data = df['text'].apply(word_tokenize)
+data = []
 
+# Browse (Interate the data) and add store them into in a list
+for text in pd.Series(X).dropna(): # Using dropana to avoid NaN Errors
+  sentences = sent_tokenize(text)
+  # Tokenize the sentences into a words
+  for sent in sentences:
+    words = word_tokenize(sent.lower())
+    data.append(words)
+
+print(data[10])
+print(X[10])
