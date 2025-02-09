@@ -4,6 +4,7 @@ import nltk
 from nltk.tokenize import sent_tokenize, word_tokenize
 import pandas as pd
 
+nltk.download('punkt_tab')
 
 # Function to load and preprocess the dataset 
 
@@ -31,10 +32,30 @@ data = []
 # Browse (Interate the data) and add store them into in a list
 for text in pd.Series(X).dropna(): # Using dropana to avoid NaN Errors
   sentences = sent_tokenize(text)
-  # Tokenize the sentences into a words
+  # Tokenize the sentences into a words and apply lower function
   for sent in sentences:
-    words = word_tokenize(sent.lower())
+    words = [word.lower() for word in word_tokenize(sent)]
     data.append(words)
 
-print(data[10])
-print(X[10])
+# Using Skip-Gram as Word Embbeding technics 
+
+SkipGramModel = Word2Vec(
+    sentences= data, 
+    vector_size= 150, 
+    window= 7, 
+    sg= 1, 
+    min_count= 1, 
+    workers= 4,
+    )
+
+# Training
+SkipGramModel.train(data, total_examples= len(data), epochs= 20)
+
+# Saving
+#SkipGramModel.save("SkipGramModel.bin")
+
+print(SkipGramModel.wv.most_similar("fuck", topn=5))
+
+print()
+
+print(SkipGramModel.wv["fuck"])
